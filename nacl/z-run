@@ -1,0 +1,69 @@
+#!/dev/null
+
+
+
+
+<< test
+	exec -- "${ZRUN[@]}" ':: python' ./sources/tests.py "${@}"
+!!
+
+
+
+
+<< python
+	exec ./.temporary/python/bin/python \
+			-s -E -R -O -B \
+			"${@}" \
+	#
+!!
+
+
+
+
+<< initialize / requirements
+	test "${#}" -eq 0
+	
+	./.temporary/python/bin/pip install --compile --requirement ./requirements.txt
+!!
+
+
+<< initialize / virtualenv
+	test "${#}" -eq 0
+	
+	if test -e ./.temporary/python/.initialized ; then
+		exit -- 0
+	fi
+	
+	virtualenv-2.7 \
+			--python python2.7 \
+			--clear \
+			--no-site-packages \
+			--no-setuptools \
+			--no-wheel \
+			--no-download \
+			--unzip-setuptools \
+			-- \
+			./.temporary/python \
+		#
+	
+	./.temporary/python/bin/pip install --upgrade --compile -- pip
+	./.temporary/python/bin/pip install --upgrade --compile -- wheel
+	./.temporary/python/bin/pip install --upgrade --compile -- setuptools
+	
+	touch -- ./.temporary/python/.initialized
+!!
+
+
+<< initialize / temporary
+	test "${#}" -eq 0
+	
+	if test -e ./.temporary ; then
+		exit -- 0
+	fi
+	
+	_token="${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+	_target="${TMPDIR:-/tmp}/gemini-experiments--${_token}"
+	mkdir -- "${_target}"
+	ln -s -T -- "${_target}" ./.temporary
+!!
+
