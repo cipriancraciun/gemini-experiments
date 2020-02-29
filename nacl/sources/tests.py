@@ -13,7 +13,7 @@ def test_transport_server () :
 	
 	_server = socket_listen (_test_address)
 	
-	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state = transport_accept (_server, None, None)
+	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state = transport_accept (_server, None)
 	
 	log_cut ()
 	
@@ -33,7 +33,7 @@ def test_transport_server () :
 
 def test_transport_client () :
 	
-	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state = transport_connect (_test_address, None, None)
+	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state = transport_connect (_test_address, None)
 	
 	log_cut ()
 	

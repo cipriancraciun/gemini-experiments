@@ -7,28 +7,28 @@ from utils import *
 
 
 
-def transport_accept (_socket, _local_sign_pub_key, _local_sign_priv_key) :
+def transport_accept (_socket, _local_sign_priv_key) :
 	
 	log ("[c217c7f7]", "[transport][server]", "accepting...")
 	
 	_socket = socket_accept (_socket)
 	
 	_peer_sign_pub_key, _inbound_key, _outbound_key, _inbound_nonce, _outbound_nonce \
-		= transport_prepare (_socket, _local_sign_pub_key, _local_sign_priv_key, False)
+		= transport_prepare (_socket, _local_sign_priv_key, False)
 	
 	log ("[4bf0c410]", "[transport][server]", "accepted;")
 	
 	return _socket, _peer_sign_pub_key, _inbound_key, _outbound_key, _inbound_nonce, _outbound_nonce
 
 
-def transport_connect (_address, _local_sign_pub_key, _local_sign_priv_key) :
+def transport_connect (_address, _local_sign_priv_key) :
 	
 	log ("[bae0d7f1]", "[transport][client]", "connecting...")
 	
 	_socket = socket_connect (_address)
 	
 	_peer_sign_pub_key, _inbound_key, _outbound_key, _inbound_nonce, _outbound_nonce \
-		= transport_prepare (_socket, _local_sign_pub_key, _local_sign_priv_key, True)
+		= transport_prepare (_socket, _local_sign_priv_key, True)
 	
 	log ("[280cd66b]", "[transport][client]", "connected;")
 	
@@ -37,18 +37,19 @@ def transport_connect (_address, _local_sign_pub_key, _local_sign_priv_key) :
 
 
 
-def transport_prepare (_socket, _local_sign_pub_key, _local_sign_priv_key, is_client) :
+def transport_prepare (_socket, _local_sign_priv_key, is_client) :
 	
 	
 	log ("[158e71a4]", "[transport][prepare]", "begin...")
 	
 	
-	if _local_sign_pub_key is None :
-		if _local_sign_priv_key is not None :
-			raise Exception ("[5ece1af8]")
+	if _local_sign_priv_key is None :
 		
 		log ("[a520f03a]", "[transport][prepare]", "generating local signature keys...")
 		_local_sign_pub_key, _local_sign_priv_key = signature_keys_generate ()
+		
+	else :
+		_local_sign_pub_key, _local_sign_priv_key = signature_keys_generate_0 (_local_sign_priv_key)
 	
 	
 	log ("[34985587]", "[transport][prepare]", "generating local session keys...")

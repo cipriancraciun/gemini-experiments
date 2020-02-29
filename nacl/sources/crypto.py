@@ -20,11 +20,18 @@ def signature_keys_generate () :
 	return _local_sign_pub_key, _local_sign_priv_key
 
 
+def signature_keys_generate_0 (_local_sign_priv_key) :
+	
+	_local_sign_pub_key = pysodium.crypto_sign_sk_to_pk (_local_sign_priv_key)
+	
+	return _local_sign_pub_key, _local_sign_priv_key
+
+
 def signature_verifier_generate (_local_sign_priv_key, _peer_sess_pub_key) :
 	
 	log ("[41a10bce]", "[crypto][signature]", "signing `%s`...", _peer_sess_pub_key.encode ("base64"))
 	
-	_verifier = pysodium.crypto_sign (_peer_sess_pub_key, _local_sign_priv_key)
+	_verifier = pysodium.crypto_sign_detached (_peer_sess_pub_key, _local_sign_priv_key)
 	
 	log ("[66026b06]", "[crypto][signature]", "signed `%s`;", _verifier.encode ("b64"))
 	
@@ -35,12 +42,9 @@ def signature_verifier_check (_peer_sign_pub_key, _local_sess_pub_key, _verifier
 	
 	log ("[e7943771]", "[crypto][signature]", "verifying `%s`...", _verifier.encode ("b64"))
 	
-	_payload = pysodium.crypto_sign_open (_verifier, _peer_sign_pub_key)
+	pysodium.crypto_sign_verify_detached (_verifier, _local_sess_pub_key, _peer_sign_pub_key)
 	
-	if _payload != _local_sess_pub_key :
-		raise Exception ("[a0ace193]")
-	
-	log ("[37e1f393]", "[crypto][signature]", "verified `%s`;", _payload.encode ("b64"))
+	log ("[37e1f393]", "[crypto][signature]", "verified `%s`;", _local_sess_pub_key.encode ("b64"))
 
 
 
