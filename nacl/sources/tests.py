@@ -3,17 +3,40 @@
 import sys
 
 from packets import *
+from protocol_v1 import *
 from transport import *
 from utils import *
 
 
 
 
+def test_protocol_v1_server () :
+	
+	_listener = socket_listen (_test_address)
+	
+	def _handle (_selector) :
+		return "20", "text/plain", "hello world!"
+	
+	protocol_v1_server (_listener, None, _handle)
+	
+	_listener.close ()
+
+
+def test_protocol_v1_client () :
+	
+	_body = protocol_v1_client (_test_address, "/", None, None)
+	
+	assert _body == "hello world!"
+
+
+
+
 def test_transport_server () :
 	
-	_server = socket_listen (_test_address)
+	_listener = socket_listen (_test_address)
 	
-	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state = transport_accept (_server, None)
+	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state \
+			= transport_accept (_listener, None)
 	
 	log_cut ()
 	
@@ -29,11 +52,13 @@ def test_transport_server () :
 		log_cut ()
 	
 	_socket.close ()
+	_listener.close ()
 
 
 def test_transport_client () :
 	
-	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state = transport_connect (_test_address, None)
+	_socket, _peer_public_key, _inbound_key, _outbound_key, _inbound_state, _outbound_state \
+			= transport_connect (_test_address, None)
 	
 	log_cut ()
 	
@@ -55,8 +80,8 @@ def test_transport_client () :
 
 def test_packets_server () :
 	
-	_server = socket_listen (_test_address)
-	_socket = socket_accept (_server)
+	_listener = socket_listen (_test_address)
+	_socket = socket_accept (_listener)
 	
 	for _index in xrange (10) :
 		
@@ -66,6 +91,7 @@ def test_packets_server () :
 		packet_output (_socket, "pong-%d" % _index)
 	
 	_socket.close ()
+	_listener.close ()
 
 
 def test_packets_client () :
