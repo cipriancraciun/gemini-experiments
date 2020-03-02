@@ -3,6 +3,15 @@
 
 
 
+:: test / protocol-v1 / server :: exec -- "${ZRUN[@]}" ':: test' protocol_v1_server "${@}"
+:: test / protocol-v1 / client :: exec -- "${ZRUN[@]}" ':: test' protocol_v1_client "${@}"
+
+:: test / transport / server :: exec -- "${ZRUN[@]}" ':: test' transport_server "${@}"
+:: test / transport / client :: exec -- "${ZRUN[@]}" ':: test' transport_client "${@}"
+
+:: test / packets / server :: exec -- "${ZRUN[@]}" ':: test' packets_server "${@}"
+:: test / packets / client :: exec -- "${ZRUN[@]}" ':: test' packets_client "${@}"
+
 << test
 	exec -- "${ZRUN[@]}" ':: python' ./sources/tests.py "${@}"
 !!
