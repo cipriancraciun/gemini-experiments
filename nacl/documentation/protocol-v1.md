@@ -44,14 +44,14 @@ Observations:
 
 The CurveCP protocol (https://curvecp.org/security.html) (authored by Daniel J. Bernstein) answers the following questions, which I'll try to assess for my protocol v1 proposal:
 
-* Does it provide server authentication?  Yes (by using the server's permanent public/private key pair).
-* Does it provide client authentication?  Yes (by using the client's permanent public/private key pair).  If the client doesn't want to have a permanent identity, it can generate transient key pairs (either per client life-time, or per session).
-* Does it stop replay attacks?  Yes, by both the client and the server generate ephemeral public/private Curve25519 based on which a per-session ephemeral symmetric key (one for each direction) is derived;  thus given that at least one of the peers behave correctly and generates a new ephemeral public/private key, the resulting symmetric key would be unique.  With regard to authentication, given that each peer signs a token the other has sent (in our case the ephemeral public key), authentication can't be replayed.
-* Does it provide passive forward secrecy?  Yes, as described above, the session is protected by an ephemeral symmetric key, which if neither of the peers stores, can't be recovered.  (The peers shouldn't also store the ephemeral private keys.)
-* Does it provide active forward secrecy?  Unknown.  (https://en.wikipedia.org/wiki/Forward_secrecy#Weak_perfect_forward_secrecy)
-* Does it provide options to disable encryption and to disable authentication?  No.  Both encryption and authentication (both for the client and server) are mandatory.
-* Does it provide client address authentication?  No.  Clients are assumed to have dynamic or roaming IP's.
-* Does it protect against traffic analysis?  No.  Although the handshake messages have fixed length.  The rest of the messages should be padded accordingly if length obfuscation is required.
+* **Does it provide server authentication?**  Yes (by using the server's permanent public/private key pair).
+* **Does it provide client authentication?**  Yes (by using the client's permanent public/private key pair).  If the client doesn't want to have a permanent identity, it can generate transient key pairs (either per client life-time, or per session).
+* **Does it stop replay attacks?**  Yes, by both the client and the server generate ephemeral public/private Curve25519 based on which a per-session ephemeral symmetric key (one for each direction) is derived;  thus given that at least one of the peers behave correctly and generates a new ephemeral public/private key, the resulting symmetric key would be unique.  With regard to authentication, given that each peer signs a token the other has sent (in our case the ephemeral public key), authentication can't be replayed.
+* **Does it provide passive forward secrecy?**  Yes, as described above, the session is protected by an ephemeral symmetric key, which if neither of the peers stores, can't be recovered.  (The peers shouldn't also store the ephemeral private keys.)
+* **Does it provide active forward secrecy?**  Unknown.  (https://en.wikipedia.org/wiki/Forward_secrecy#Weak_perfect_forward_secrecy)
+* **Does it provide options to disable encryption and to disable authentication?**  No.  Both encryption and authentication (both for the client and server) are mandatory.
+* **Does it provide client address authentication?**  No.  Clients are assumed to have dynamic or roaming IP's.
+* **Does it protect against traffic analysis?**  No.  Although the handshake messages have fixed length.  The rest of the messages should be padded accordingly if length obfuscation is required.
 
 
 
