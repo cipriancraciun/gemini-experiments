@@ -76,3 +76,39 @@
 	ln -s -T -- "${_target}" ./.temporary
 !!
 
+
+
+
+:: plantuml / watch / protocol-v1 / png :: exec -- "${ZRUN[@]}" ':: plantuml / watch' ./documentation/diagrams/protocol-v1.plantuml png
+:: plantuml / watch / protocol-v1 / all :: exec -- "${ZRUN[@]}" ':: plantuml / build' ./documentation/diagrams/protocol-v1.plantuml
+
+
+--<< plantuml / watch
+	test "${#}" -ge 1
+	_source="${1}"
+	shift -- 1
+	exec -- watchexec --watch "${_source}" --no-shell -- "${ZRUN[@]}" ':: plantuml / exec' "${_source}" "${@}"
+!!
+
+--<< plantuml / build
+	test "${#}" -ge 1
+	_source="${1}"
+	shift -- 1
+	for _type in png svg ; do
+		"${ZRUN[@]}" ':: plantuml / exec' "${_source}" "${_type}" "${@}"
+	done
+!!
+
+--<< plantuml / exec
+	test "${#}" -eq 2
+	_source="${1}"
+	_type="${2}"
+	shift -- 2
+	_target="$( exec -- dirname -- "${_source}" )/$( exec -- basename -- "${_source}" .plantuml ).${_type}"
+	java -jar /usr/share/java/plantuml.jar -pipe -t"${_type}" \
+		< "${_source}" \
+		>| "${_target}.tmp" \
+	#
+	mv -T -- "${_target}.tmp" "${_target}"
+!!
+

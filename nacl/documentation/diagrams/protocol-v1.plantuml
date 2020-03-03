@@ -1,0 +1,142 @@
+@startuml
+	
+	
+	
+	
+	participant Client
+	participant Server
+	
+	
+	==[ offline preparation ]==
+	
+	
+	group Signature public/private keys, permanent or temporary (used for identity authentication)
+	rnote over Server : S-Sig-Pub, S-Sig-Priv := Ed25519::keys ()
+	rnote over Client : C-Sig-Pub, C-Sig-Priv := Ed25519::keys ()
+	end
+	
+	
+	==[ transport preparation ]==
+	
+	
+	group Session public/private keys, ephemeral (used for handshake and forward-secrecy)
+	rnote over Server : S-Ses-Pub, S-Ses-Priv := Curve25519::keys ()
+	rnote over Client : C-Ses-Pub, C-Ses-Priv := Curve25519::keys ()
+	end
+	
+	
+	Client --> Server : [TCP handshake]
+	activate Client
+	activate Server
+	Server --> Client : [TCP handshake]
+	
+	
+	group Handshake phase
+	
+	group Unencrypted exchanges over TCP
+	Client -> Server : C-Ses-Pub
+	Server -> Client : S-Ses-Pub
+	end
+	
+	group Symmetric keys, ephemeral (used for exchange and forward-secrecy)
+	rnote over Server : Q := Curve25519::exchange (C-Ses-Pub, S-Ses-Pub)
+	rnote over Server : S-X | C-X := Blake2B (Q | C-Ses-Pub | S-Ses-Pub)
+	rnote over Server : destroy (Q, S-Sess-Priv)
+	rnote over Server : S-N := 0x00..00 (64 bits) | S-Ses-Pub (truncate last bits)
+	rnote over Server : C-N := 0x00..00 (64 bits) | C-Ses-Pub (truncate last bits)
+	rnote over Client : Q := Curve25519::exchange (C-Ses-Pub, S-Ses-Pub)
+	rnote over Client : S-X | C-X := Blake2B (Q | C-Ses-Pub | S-Ses-Pub)
+	rnote over Client : destroy (Q, C-Sess-Priv)
+	rnote over Client : S-N := 0x00..00 (64 bits) | S-Ses-Pub (truncate last bits)
+	rnote over Client : C-N := 0x00..00 (64 bits) | C-Ses-Pub (truncate last bits)
+	end
+	
+	group Encrypted exchanges over TCP (with ephemeral keys)
+	
+	group Server authentication
+	rnote over Server : **S-Verifier** := Ed25519::sign (msg = **C-Ses-Pub**, key = **S-Sig-Priv**)
+	Server -> Client : XSalsa20-Poly1305 (msg = **S-Sig-Pub**, key = **C-X**, nonce = **C-N++**)
+	Server -> Client : XSalsa20-Poly1305 (msg = **S-Verifier**, key = **C-X**, nonce = **C-N++**)
+	rnote over Client : Ed25519::verify (msg = **S-Verifier**, key = **S-Sig-Pub**)
+	rnote over Client : is_trusted? (S-Sig-Pub)
+	end
+	
+	group Client authentication
+	rnote over Client : **C-Verifier** := Ed25519::sign (msg = **S-Ses-Pub**, key = **C-Sig-Priv**)
+	Client -> Server : XSalsa20-Poly1305 (msg = **C-Sig-Pub**, key = **S-X**, nonce = **S-N++**)
+	Client -> Server : XSalsa20-Poly1305 (msg = **C-Verifier**, key = **S-X**, nonce = **S-N++**)
+	rnote over Server : Ed25519::verify (msg = **C-Verifier**, key = **C-Sig-Pub**)
+	rnote over Server : is_trusted? (C-Sig-Pub)
+	end
+	
+	end
+	
+	end
+	
+	
+	==[ transport ready ]==
+	
+	
+	group Exchange phase (always encrypted over TCP with ephemeral keys)
+	Client -> Server : XSalsa20-Poly1305 (msg = ..., key = S-X, nonce = S-N++)
+	...
+	Server -> Client : XSalsa20-Poly1305 (msg = ..., key = C-X, nonce = C-N++)
+	...
+	end
+	
+	Server --> Client : [TCP close]
+	deactivate Server
+	deactivate Client
+	
+	
+	==[ transport terminated ]==
+	
+	
+	group Ephemeral keys destruction
+	rnote over Server : destroy (S-X, C-X)
+	rnote over Client : destroy (S-X, C-X)
+	end
+	
+	
+	
+	
+	skinparam Shadowing false
+	skinparam Monochrome true
+	skinparam BackgroundColor white
+	skinparam DefaultFontName "JetBrains Mono"
+	skinparam DefaultMonospacedFontName "JetBrains Mono"
+	skinparam DefaultFontSize 12
+	
+	skinparam BoxPadding 32
+	
+	skinparam sequence {
+		
+		LifeLineBackgroundColor #808080
+		LifeLineBorderColor #808080
+		LifeLineBorderThickness 2
+		
+		GroupHeaderFontSize 14
+		GroupBackgroundColor white
+		GroupBodyBackgroundColor transparent
+		GroupBorderThickness 1
+		
+		BoxBackgroundColor transparent
+		
+		DividerFontSize 14
+		DividerFontColor white
+		DividerBackgroundColor black
+		DividerBorderColor black
+		DividerBorderThickness 1
+		
+	}
+	
+	skinparam NoteFontSize 12
+	skinparam NoteFontColor black
+	skinparam NoteBackgroundColor white
+	skinparam NoteBorderColor black
+	skinparam NoteBorderThickness 1
+	
+	
+	
+	
+@enduml
