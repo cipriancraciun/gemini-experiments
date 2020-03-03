@@ -32,7 +32,7 @@
 << initialize / requirements
 	test "${#}" -eq 0
 	
-	./.temporary/python/bin/pip install --compile --requirement ./requirements.txt
+	./.temporary/python/bin/pip install --compile --requirement ./sources/requirements.txt
 !!
 
 
