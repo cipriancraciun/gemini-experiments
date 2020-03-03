@@ -37,7 +37,7 @@ def transport_connect (_address, _local_sign_priv_key) :
 
 
 
-def transport_prepare (_socket, _local_sign_priv_key, is_client) :
+def transport_prepare (_socket, _local_sign_priv_key, _is_client) :
 	
 	
 	log ("[158e71a4]", "[transport][prepare]", "begin...")
@@ -65,8 +65,30 @@ def transport_prepare (_socket, _local_sign_priv_key, is_client) :
 	
 	log ("[59f2d020]", "[transport][prepare]", "deriving session secret keys and nonces...")
 	_inbound_key, _outbound_key, _inbound_nonce, _outbound_nonce \
-			= session_prepare_phase_2 (_local_sess_pub_key, _local_sess_priv_key, _peer_sess_pub_key, is_client)
+			= session_prepare_phase_2 (_local_sess_pub_key, _local_sess_priv_key, _peer_sess_pub_key, _is_client)
 	
+	
+	if _is_client :
+		
+		_peer_sign_pub_key = transport_prepare_signature_check (_socket, _local_sess_pub_key, _inbound_key, _inbound_nonce)
+		# NOTE:  Here, before proceeding, we must determine if we "trust" the server, as identified by the `_peer_sign_pub_key`.
+		
+		transport_prepare_signature_send (_socket, _local_sign_pub_key, _local_sign_priv_key, _peer_sess_pub_key, _outbound_key, _outbound_nonce)
+		
+	else :
+		
+		transport_prepare_signature_send (_socket, _local_sign_pub_key, _local_sign_priv_key, _peer_sess_pub_key, _outbound_key, _outbound_nonce)
+		
+		_peer_sign_pub_key = transport_prepare_signature_check (_socket, _local_sess_pub_key, _inbound_key, _inbound_nonce)
+		# NOTE:  Here, before proceeding, we must determine if we "trust" the client, as identified by the `_peer_sign_pub_key`.
+	
+	
+	log ("[7c4bb7a0]", "[transport][prepare]", "succeeded;")
+	
+	return _peer_sign_pub_key, _inbound_key, _outbound_key, _inbound_nonce, _outbound_nonce
+
+
+def transport_prepare_signature_send (_socket, _local_sign_pub_key, _local_sign_priv_key, _peer_sess_pub_key, _outbound_key, _outbound_nonce) :
 	
 	log ("[12f5a09d]", "[transport][prepare]", "generating local signature verifier...")
 	_local_verifier = signature_verifier_generate (_local_sign_priv_key, _peer_sess_pub_key)
@@ -77,7 +99,9 @@ def transport_prepare (_socket, _local_sign_priv_key, is_client) :
 	
 	log ("[68499460]", "[transport][prepare]", "sending local signature verifier...")
 	transport_output (_socket, _outbound_key, _outbound_nonce, _local_verifier)
-	
+
+
+def transport_prepare_signature_check (_socket, _local_sess_pub_key, _inbound_key, _inbound_nonce) :
 	
 	log ("[426190cd]", "[transport][prepare]", "receiving peer signature public key...")
 	_peer_sign_pub_key = transport_input (_socket, _inbound_key, _inbound_nonce)
@@ -89,9 +113,7 @@ def transport_prepare (_socket, _local_sign_priv_key, is_client) :
 	log ("[4c17dc79]", "[transport][prepare]", "checking peer signature verifier...")
 	signature_verifier_check (_peer_sign_pub_key, _local_sess_pub_key, _peer_verifier)
 	
-	log ("[7c4bb7a0]", "[transport][prepare]", "succeeded;")
-	
-	return _peer_sign_pub_key, _inbound_key, _outbound_key, _inbound_nonce, _outbound_nonce
+	return _peer_sign_pub_key
 
 
 
