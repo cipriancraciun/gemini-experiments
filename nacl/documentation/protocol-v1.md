@@ -23,6 +23,17 @@ The following are the requirements, constraints and general guide-lines:
 
 
 
+## Threat model
+
+* non-nation-state level attackers;
+* non-corporate level attackers;
+* the main threats would be dumb man-in-the-middle appliances (filtering content or injecting adds, malware, etc.);
+* the other omnipresent threat would be privacy, like for example drag-net surveillance by nation-state level actors;
+* if I would put a price on "breaking a single session" I would say if it costs more than $1000 to break a given session's encryption, it's not worth it;
+
+
+
+
 ## Used cryptographic primitives
 
 It uses only high-level functions provided by `libsodium` (see `libsodium-internals.md`):
