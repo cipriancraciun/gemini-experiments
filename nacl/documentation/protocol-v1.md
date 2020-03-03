@@ -9,14 +9,16 @@
 This encryption protocol is meant as a replacement for TLS in the context of the `gemini://` protocol (https://gemini.circumlunar.space/), a newer `gopher://` alternative, which basically provides a simpler HTTP `GET`-only alternative.
 
 The following are the requirements, constraints and general guide-lines:
-* provide server authentication, with a "trust-on-first-use" model, i.e. like SSH server authentication works;
-* provide optional client authentication, based on a white-list maintained on the server side;  (i.e. no certificate authority required;)
-* provide forward-secrecy;
+* provide server authentication, with a "trust-on-first-use" model, i.e. like SSH server authentication works (`~/.ssh/known_hosts`);
+* provide optional client authentication, based on a whitelist maintained on the server side, i.e. like SSH client authentication works (`~/.ssh/authorized_keys`);
+* (no certificate authority required, but if Let's Encrypt certificates can be integrated it is a plus;)
+* provide forward-secrecy  (i.e. compromising client or server long-term keys shouldn't allow decrypting previous exchanges);
 * provide a message-based framing usable by the application layer;  (i.e. if it provides framing, allow the application to reuse it, don't just present a stream of bytes to the application;)  the size of the messages are usually small, fit in memory, the average being the average HTTP response body of typical internet websites;
 * use only the high-level constructs (or low-level if required) provided only by `libsodium` or NaCL;  (i.e. no other cryptographic dependency except `libsodium`;)
 * be as simple as possible, without any configuration parameters;
 * be correctly implementable by a novice developer without cryptographic expertise;  (thus the emphasis on `libsodium` high-level constructs;)
 * provide as much privacy for the client as possible without hampering simplicity or performance;  if needed client privacy can be prioritized over server privacy;
+* provide optional "virtual-host" functionality, by which the client can specify the identity of the server it wants to talk to;  (not supported by this proposal;)
 
 
 
